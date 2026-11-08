@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
-
 :root {
   font-family: 'DM Sans', 'Segoe UI', sans-serif;
   color: #302f2a;
@@ -85,26 +83,6 @@ h1 { margin: 13px 0 12px; color: #34332e; font-family: 'DM Serif Display', Georg
 h1 em { color: #986a46; font-weight: 400; }
 .welcome-subtitle { max-width: 405px; margin-bottom: 0; color: #77766e; font-size: 12px; line-height: 1.8; }
 .welcome-illustration { position: relative; height: 237px; overflow: hidden; border: 1px solid #dfd6c6; border-radius: 7px; background: linear-gradient(180deg,#e8e4d7 0%,#ece7d9 61%,#d1c6aa 61%,#c9bd9e 100%); box-shadow: 0 4px 14px #4e463315; }
-.sun-disc { position: absolute; top: 26px; right: 69px; width: 48px; height: 48px; border: 7px solid #e9d8b7; border-radius: 50%; background: #d9a968; box-shadow: 0 0 0 5px #d9a96822; }
-.cloud { position: absolute; height: 9px; border-radius: 9px; background: #f6f1e7; opacity: .8; }
-.cloud:before, .cloud:after { position: absolute; bottom: 1px; width: 13px; height: 13px; border-radius: 50%; background: inherit; content: ''; }
-.cloud:before { left: 7px; }.cloud:after { left: 17px; width: 10px; height: 10px; }
-.cloud-one { top: 53px; left: 48px; width: 43px; }.cloud-two { top: 83px; right: 48px; width: 34px; transform: scale(.7); }
-.hill { position: absolute; bottom: 38px; border-radius: 50% 50% 0 0; }
-.hill-back { left: -9%; width: 69%; height: 105px; background: #aab197; transform: rotate(-6deg); }
-.hill-front { right: -12%; width: 70%; height: 92px; background: #8d987d; transform: rotate(7deg); }
-.sprite-house { position: absolute; z-index: 1; bottom: 56px; left: 42%; width: 108px; height: 121px; }
-.house-body { position: absolute; right: 7px; bottom: 0; left: 7px; height: 76px; border: 3px solid #684b36; background: repeating-linear-gradient(0deg,#b77e4f 0 12px,#a97248 12px 14px); box-shadow: inset 5px 0 #c58f60; }
-.house-roof { position: absolute; z-index: 1; top: 0; left: 0; width: 108px; height: 57px; background: #575249; clip-path: polygon(50% 0,100% 80%,92% 91%,50% 27%,8% 91%,0 80%); filter: drop-shadow(0 3px 1px #463c31); }
-.house-window { position: absolute; top: 18px; left: 12px; width: 20px; height: 23px; border: 3px solid #694c36; background: #e8cf9f; box-shadow: inset 8px 0 #d5bc8d; }
-.house-door { position: absolute; right: 12px; bottom: 0; width: 24px; height: 45px; border: 3px solid #654731; border-bottom: 0; background: #795337; }
-.house-door:after { position: absolute; top: 22px; right: 4px; width: 4px; height: 4px; border-radius: 50%; background: #d7ad71; content: ''; }
-.sprite-tree { position: absolute; z-index: 2; bottom: 58px; width: 47px; height: 91px; }
-.tree-one { left: 20%; transform: scale(.8); }.tree-two { right: 18%; bottom: 52px; transform: scale(.64); }
-.sprite-tree i { position: absolute; bottom: 0; left: 20px; width: 8px; height: 35px; background: #70543b; }
-.sprite-tree b { position: absolute; top: 4px; left: 1px; width: 45px; height: 54px; border: 3px solid #56664c; border-radius: 47% 47% 37% 37%; background: #768665; box-shadow: inset 9px 2px #899474, inset -8px -4px #637457; }
-.garden-path { position: absolute; z-index: 2; bottom: -27px; left: 49%; width: 38px; height: 82px; background: #c6b99b; clip-path: polygon(40% 0,60% 0,100% 100%,0 100%); }
-.art-caption { position: absolute; z-index: 3; right: 13px; bottom: 11px; color: #756b59; font-size: 7px; font-weight: 700; letter-spacing: 1.4px; }
 
 .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 24px 0 34px; }
 .stat-card { display: flex; align-items: center; gap: 12px; min-height: 70px; padding: 12px 15px; border: 1px solid #e7e4dc; border-radius: 6px; background: #fbfaf6; }

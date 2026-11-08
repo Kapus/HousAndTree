@@ -22,6 +22,10 @@ const starterData = {
 
 let data = loadData();
 let activeProjectId = null;
+let activeTaskId = null;
+let draftTaskImage = '';
+let imageLoading = false;
+let imageRequest = 0;
 let modalMode = '';
 let toastTimer;
 
@@ -43,12 +47,14 @@ function loadData() {
   }
 }
 
-function saveData() {
+function saveData(candidate = data) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(candidate));
+    return true;
   } catch (error) {
     console.error('Kunde inte spara Hem & Härd-data.', error);
     showToast('Kunde inte spara ändringen i webbläsaren.');
+    return false;
   }
 }
 
@@ -60,22 +66,50 @@ function projectById(id) {
   return data.projects.find((project) => project.id === id);
 }
 
+function sprite(name) {
+  return `<img class="pixel-icon" src="assets/sprites/${name}.png" alt="" width="64" height="64" loading="lazy" />`;
+}
+
+function taskSprite(task) {
+  const title = task.title.toLocaleLowerCase('sv-SE');
+  if (title.includes('löv')) return 'leaves';
+  if (title.includes('hängränn')) return 'gutter';
+  if (title.includes('förråd')) return 'crate';
+  if (title.includes('olja') || title.includes('måla')) return 'roller';
+  return { Inomhus: 'home', Trädgård: 'garden', Underhåll: 'tools' }[task.category] || 'clipboard';
+}
+
 function progress(project) {
   const total = project.items.length;
   const done = project.items.filter((item) => item.done).length;
   return { total, done, percent: total ? Math.round((done / total) * 100) : 0 };
 }
 
-function showView(name) {
-  const viewIds = ['home', 'projects', 'library', 'project'];
+function showView(name, updateRoute = true) {
+  if (name === 'task' && !taskById(activeTaskId)) {
+    showToast('Uppgiften finns inte längre.');
+    showView('library');
+    return;
+  }
+  if (name === 'project' && !projectById(activeProjectId)) {
+    showToast('Projektet finns inte längre.');
+    showView('projects');
+    return;
+  }
+  const viewIds = ['home', 'projects', 'library', 'project', 'task'];
   viewIds.forEach((view) => byId(`${view}-view`).classList.toggle('hidden', view !== name));
   document.querySelectorAll('.nav-link').forEach((button) => {
-    button.classList.toggle('is-active', button.dataset.view === (name === 'project' ? 'projects' : name));
+    button.classList.toggle('is-active', button.dataset.view === (name === 'project' ? 'projects' : name === 'task' ? 'library' : name));
   });
-  const names = { home: 'Överblick', projects: 'Projekt', library: 'Uppgiftsboden', project: 'Projekt' };
+  const names = { home: 'Överblick', projects: 'Projekt', library: 'Uppgiftsboden', project: 'Projekt', task: 'Uppgift' };
   byId('breadcrumb-current').textContent = name === 'project' && projectById(activeProjectId)
     ? projectById(activeProjectId).title : names[name];
   if (name === 'project') renderProjectDetail();
+  if (name === 'task') renderTaskProfile();
+  if (updateRoute) {
+    const hash = name === 'task' ? `#task=${encodeURIComponent(activeTaskId)}` : name === 'project' ? `#project=${encodeURIComponent(activeProjectId)}` : `#${name}`;
+    if (location.hash !== hash) history.pushState(null, '', hash);
+  }
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -91,16 +125,16 @@ function renderSidebar() {
   byId('project-count').textContent = data.projects.length;
   byId('project-nav-list').innerHTML = data.projects.slice(0, 5).map((project) => `
     <button class="project-nav-item" data-project-id="${escapeHtml(project.id)}">
-      <span aria-hidden="true">▤</span><span>${escapeHtml(project.title)}</span><span class="nav-task-count">${project.items.filter((item) => !item.done).length}</span>
+      ${sprite('clipboard')}<span>${escapeHtml(project.title)}</span><span class="nav-task-count">${project.items.filter((item) => !item.done).length}</span>
     </button>`).join('');
 }
 
 function projectCard(project) {
   const state = progress(project);
-  const icons = ['▤', '⌂', '✿', '⚒'];
-  const icon = icons[Math.abs(project.title.length) % icons.length];
+  const task = taskById(project.items[0]?.taskId);
+  const icon = task ? taskSprite(task) : 'tools';
   return `<article class="project-card" data-project-id="${escapeHtml(project.id)}" tabindex="0" role="button" aria-label="Öppna projekt ${escapeHtml(project.title)}" style="--card-accent:${state.percent === 100 ? '#78856b' : '#a8744c'}">
-    <div class="project-card-top"><span class="project-glyph">${icon}</span><span class="project-date">${state.total ? `${state.done} av ${state.total} klara` : 'Nytt projekt'}</span></div>
+    <div class="project-card-top"><span class="project-glyph">${sprite(icon)}</span><span class="project-date">${state.total ? `${state.done} av ${state.total} klara` : 'Nytt projekt'}</span></div>
     <h3>${escapeHtml(project.title)}</h3><div class="project-meta">${escapeHtml(project.description || 'Dina uppgifter, samlade på ett ställe.')}</div>
     <div class="card-progress"><span style="width:${state.percent}%"></span></div>
     <div class="card-progress-caption"><span>${state.total ? 'Framsteg' : 'Lägg till en uppgift för att komma igång'}</span><span>${state.percent}%</span></div>
@@ -108,7 +142,7 @@ function projectCard(project) {
 }
 
 function emptyState(title, message, buttonText, action) {
-  return `<div class="empty-state"><span class="empty-state-icon">⌂</span><h3>${title}</h3><p>${message}</p><button class="button button-dark" data-action="${action}"><span>＋</span> ${buttonText}</button></div>`;
+  return `<div class="empty-state"><span class="empty-state-icon">${sprite('home')}</span><h3>${title}</h3><p>${message}</p><button class="button button-dark" data-action="${action}">${sprite('plus')} ${buttonText}</button></div>`;
 }
 
 function renderHome() {
@@ -122,8 +156,9 @@ function renderHome() {
     ? data.projects.slice(0, 3).map(projectCard).join('')
     : emptyState('Här börjar det.', 'Skapa ett projekt och samla uppgifter som du vill få gjorda.', 'Skapa ditt första projekt', 'create-project');
   byId('next-up-list').innerHTML = allItems.filter((entry) => !entry.item.done).slice(0, 4).map(({ project, item, task }) => `
-    <div class="next-task"><button class="task-check" data-toggle-task="${escapeHtml(project.id)}:${escapeHtml(item.taskId)}" aria-label="Markera ${escapeHtml(task.title)} som klar"></button>
-      <div class="next-task-copy"><strong>${escapeHtml(task.title)}</strong><span>${escapeHtml(project.title)}</span></div>
+    <div class="next-task"><button class="task-check" data-toggle-task="${escapeHtml(project.id)}:${escapeHtml(item.taskId)}" aria-pressed="false" aria-label="Markera ${escapeHtml(task.title)} som klar"></button>
+      <span class="task-thumbnail">${sprite(taskSprite(task))}</span>
+      <div class="next-task-copy"><button class="task-profile-link" data-task-id="${escapeHtml(task.id)}">${escapeHtml(task.title)}</button><span>${escapeHtml(project.title)}</span></div>
     </div>`).join('') || '<p class="empty-inline">Allt är avbockat! Eller så väntar ditt första projekt på att skapas.</p>';
 }
 
@@ -137,9 +172,12 @@ function renderLibrary() {
   byId('library-count').textContent = `${data.tasks.length} sparade ${data.tasks.length === 1 ? 'uppgift' : 'uppgifter'}`;
   byId('library-list').innerHTML = data.tasks.length ? data.tasks.map((task) => {
     const usedIn = data.projects.filter((project) => project.items.some((item) => item.taskId === task.id)).length;
-    return `<article class="library-item"><span class="library-item-icon" aria-hidden="true">▧</span>
-      <div class="library-item-copy"><strong>${escapeHtml(task.title)}</strong><span>${escapeHtml(task.category || 'Övrigt')} · Används i ${usedIn} ${usedIn === 1 ? 'projekt' : 'projekt'}</span></div>
-      <div class="library-item-actions"><button class="small-action" data-add-to-project="${escapeHtml(task.id)}">Lägg i projekt</button><button class="small-action danger" data-delete-task="${escapeHtml(task.id)}" aria-label="Ta bort ${escapeHtml(task.title)}">Ta bort</button></div>
+    return `<article class="library-item">
+      <button class="library-task-open" data-task-id="${escapeHtml(task.id)}" aria-label="Öppna uppgift ${escapeHtml(task.title)}">
+        <span class="library-item-icon" aria-hidden="true">${sprite(taskSprite(task))}</span>
+        <span class="library-item-copy"><strong>${escapeHtml(task.title)}</strong><span>${escapeHtml(task.category || 'Övrigt')} · Används i ${usedIn} projekt</span>${task.description ? `<span class="library-task-summary">${escapeHtml(task.description)}</span>` : ''}</span>
+      </button>
+      <div class="library-item-actions"><button class="small-action" data-add-to-project="${escapeHtml(task.id)}">${sprite('plus')} Lägg i projekt</button><button class="small-action danger" data-delete-task="${escapeHtml(task.id)}" aria-label="Ta bort ${escapeHtml(task.title)}">${sprite('trash')} Ta bort</button></div>
     </article>`;
   }).join('') : emptyState('Uppgiftsboden är tom.', 'Spara en uppgift här så kan du plocka in den i ett projekt när det passar.', 'Spara första uppgiften', 'create-task');
 }
@@ -158,10 +196,11 @@ function renderProjectDetail() {
     const task = taskById(item.taskId);
     if (!task) return '';
     return `<article class="detail-task ${item.done ? 'is-done' : ''}">
-      <button class="task-check ${item.done ? 'is-done' : ''}" data-toggle-task="${escapeHtml(project.id)}:${escapeHtml(item.taskId)}" aria-label="${item.done ? 'Markera som inte klar' : 'Markera som klar'}">${item.done ? '✓' : ''}</button>
-      <div class="detail-task-copy"><strong>${escapeHtml(task.title)}</strong><span>${escapeHtml(task.category || 'Övrigt')}</span></div>
+      <button class="task-check ${item.done ? 'is-done' : ''}" data-toggle-task="${escapeHtml(project.id)}:${escapeHtml(item.taskId)}" aria-pressed="${item.done}" aria-label="${item.done ? 'Markera som inte klar' : 'Markera som klar'}: ${escapeHtml(task.title)}"></button>
+      <span class="task-thumbnail">${sprite(taskSprite(task))}</span>
+      <div class="detail-task-copy"><button class="task-profile-link" data-task-id="${escapeHtml(task.id)}">${escapeHtml(task.title)}</button><span>${escapeHtml(task.category || 'Övrigt')}</span></div>
       <span class="task-origin">Från uppgiftsboden</span>
-      <button class="remove-task" data-remove-from-project="${escapeHtml(project.id)}:${escapeHtml(item.taskId)}" aria-label="Ta bort från projekt">×</button>
+      <button class="remove-task" data-remove-from-project="${escapeHtml(project.id)}:${escapeHtml(item.taskId)}" aria-label="Ta bort ${escapeHtml(task.title)} från projekt">${sprite('trash')}</button>
     </article>`;
   }).join('') : emptyState('Dags att fylla på.', 'Välj sparade uppgifter från uppgiftsboden eller skapa en ny.', 'Lägg till uppgift', 'add-project-task');
 }
@@ -170,6 +209,114 @@ function openProject(id) {
   activeProjectId = id;
   showView('project');
 }
+
+function openTask(id) {
+  if (!taskById(id)) { showToast('Uppgiften finns inte längre.'); showView('library'); return; }
+  activeTaskId = id;
+  showView('task');
+}
+
+function renderTaskProfile() {
+  const task = taskById(activeTaskId);
+  if (!task) { showToast('Uppgiften finns inte längre.'); showView('library'); return; }
+  imageRequest++;
+  imageLoading = false;
+  byId('task-profile-save').disabled = false;
+  draftTaskImage = task.image || '';
+  byId('task-profile-title').textContent = task.title;
+  byId('breadcrumb-current').textContent = task.title;
+  const projects = data.projects.filter(project => project.items.some(item => item.taskId === task.id));
+  byId('task-profile-usage').textContent = projects.length
+    ? `Används i: ${projects.map(project => project.title).join(', ')}`
+    : 'Sparad i Uppgiftsboden — redo att användas i ett projekt.';
+  byId('task-title').value = task.title;
+  byId('task-category').value = task.category || 'Övrigt';
+  byId('task-description').value = task.description || '';
+  byId('task-tools').value = (task.tools || []).join('\n');
+  byId('task-image').value = '';
+  byId('task-profile-add').dataset.addToProject = task.id;
+  updateTaskCover();
+}
+
+function updateTaskCover() {
+  byId('task-cover').src = draftTaskImage || 'assets/sprites/landscape.png';
+  byId('task-cover').alt = draftTaskImage ? `Omslagsbild för ${byId('task-title').value}` : 'Lanthem i kvällssolen — standardbild';
+  byId('task-cover').classList.toggle('is-photo', Boolean(draftTaskImage));
+  byId('task-image-remove').disabled = !draftTaskImage;
+}
+
+async function prepareTaskImage(file) {
+  if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Välj en JPG-, PNG- eller WebP-bild.');
+  if (file.size > 10 * 1024 * 1024) throw new Error('Bilden får vara högst 10 MB.');
+  const bitmap = await createImageBitmap(file);
+  try {
+    const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Webbläsaren kunde inte bearbeta bilden.');
+    context.fillStyle = '#fff4dc';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL('image/jpeg', .8);
+  } finally {
+    bitmap.close();
+  }
+}
+
+byId('task-image').addEventListener('change', async event => {
+  const file = event.target.files[0];
+  if (!file) return;
+  const request = ++imageRequest;
+  imageLoading = true;
+  byId('task-profile-save').disabled = true;
+  try {
+    const image = await prepareTaskImage(file);
+    if (request !== imageRequest) return;
+    draftTaskImage = image;
+    updateTaskCover();
+  } catch (error) {
+    console.error('Kunde inte läsa uppgiftens omslagsbild.', error);
+    if (request === imageRequest) showToast(error instanceof Error ? error.message : 'Kunde inte läsa bilden.');
+  } finally {
+    if (request === imageRequest) {
+      imageLoading = false;
+      byId('task-profile-save').disabled = false;
+      byId('task-image').value = '';
+    }
+  }
+});
+
+byId('task-image-remove').addEventListener('click', () => {
+  imageRequest++;
+  imageLoading = false;
+  byId('task-profile-save').disabled = false;
+  draftTaskImage = '';
+  updateTaskCover();
+});
+
+byId('task-profile-form').addEventListener('submit', event => {
+  event.preventDefault();
+  if (imageLoading) { showToast('Vänta tills bilden är färdig.'); return; }
+  const task = taskById(activeTaskId);
+  if (!task) { showToast('Uppgiften finns inte längre.'); return; }
+  const form = new FormData(event.currentTarget);
+  const title = String(form.get('title') || '').trim();
+  if (!title) { showToast('Uppgiften behöver ett namn.'); byId('task-title').focus(); return; }
+  const updated = {
+    ...task, title, category: String(form.get('category') || 'Övrigt'),
+    description: String(form.get('description') || '').trim(),
+    tools: String(form.get('tools') || '').split(/\r?\n/).map(tool => tool.trim()).filter(Boolean),
+    image: draftTaskImage,
+  };
+  const candidate = { ...data, tasks: data.tasks.map(entry => entry.id === task.id ? updated : entry) };
+  if (!saveData(candidate)) return;
+  data = candidate;
+  render();
+  renderTaskProfile();
+  showToast('Uppgiften är sparad.');
+});
 
 function openModal(mode, context = {}) {
   modalMode = mode;
@@ -232,10 +379,11 @@ function toggleTask(projectId, taskId) {
 }
 
 document.addEventListener('click', (event) => {
-  const target = event.target.closest('button, [data-project-id], [data-open-view], [data-action]');
+  const target = event.target.closest('button, [data-view], [data-project-id], [data-open-view], [data-action]');
   if (!target) return;
   if (target.dataset.view) { showView(target.dataset.view); return; }
   if (target.dataset.openView) { showView(target.dataset.openView); return; }
+  if (target.dataset.taskId) { openTask(target.dataset.taskId); return; }
   if (target.dataset.projectId) { openProject(target.dataset.projectId); return; }
   if (target.dataset.action === 'create-project') { openModal('project'); return; }
   if (target.dataset.action === 'create-task') { openModal('task'); return; }
@@ -271,7 +419,10 @@ document.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter' && event.target.matches('.project-card')) openProject(event.target.dataset.projectId);
+  if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.project-card')) {
+    event.preventDefault();
+    openProject(event.target.dataset.projectId);
+  }
   if (event.key === 'Escape') closeModal();
 });
 
@@ -308,9 +459,11 @@ byId('modal-form').addEventListener('submit', (event) => {
       title: String(form.get('title')).trim(),
       category: String(form.get('category') || 'Övrigt'),
     };
-    if (!task.title) return;
-    data.tasks.unshift(task);
-    saveData(); render(); closeModal(); showToast('Uppgiften sparades i uppgiftsboden.');
+    if (!task.title) { showToast('Uppgiften behöver ett namn.'); return; }
+    const candidate = { ...data, tasks: [task, ...data.tasks] };
+    if (!saveData(candidate)) return;
+    data = candidate;
+    render(); closeModal(); openTask(task.id); showToast('Uppgiften sparades i uppgiftsboden.');
     return;
   }
   if (modalMode === 'project-task') {
@@ -340,3 +493,30 @@ byId('modal-form').addEventListener('submit', (event) => {
 const dateFormatter = new Intl.DateTimeFormat('sv-SE', { weekday: 'long', day: 'numeric', month: 'long' });
 byId('today-label').textContent = dateFormatter.format(new Date());
 render();
+
+function restoreView() {
+  const hash = location.hash.slice(1);
+  let id;
+  if (hash.startsWith('task=') || hash.startsWith('project=')) {
+    try {
+      id = decodeURIComponent(hash.slice(hash.indexOf('=') + 1));
+    } catch (error) {
+      console.error('Kunde inte läsa länken.', error);
+      showToast('Länken är ogiltig.');
+      showView('library');
+      return;
+    }
+  }
+  if (hash.startsWith('task=')) {
+    activeTaskId = id;
+    showView('task', false);
+  } else if (hash.startsWith('project=')) {
+    activeProjectId = id;
+    showView('project', false);
+  } else {
+    showView(['home', 'projects', 'library'].includes(hash) ? hash : 'home', false);
+  }
+}
+
+window.addEventListener('hashchange', restoreView);
+restoreView();

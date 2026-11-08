@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#292821" />
     <title>Hem & Härd — hemma, ett projekt i taget</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pixel.css" />
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -13,38 +14,33 @@
       <aside class="sidebar">
         <a class="brand" href="#" aria-label="Hem och Härd, startsida" data-view="home">
           <span class="brand-mark" aria-hidden="true">
-            <svg viewBox="0 0 48 48" role="img">
-              <path d="M5 22 24 7l19 15v20H5z" fill="#9b6742" stroke="#382d23" stroke-width="3" stroke-linejoin="round" />
-              <path d="M2 23 24 5l22 18" fill="none" stroke="#d7a16b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M19 42V27h11v15M10 28h5v5h-5z" fill="#d2c4a4" stroke="#382d23" stroke-width="2" />
-              <path d="M24 13v5m-8 1 4 2m12-2-4 2" stroke="#f1c98d" stroke-width="2" stroke-linecap="round" />
-            </svg>
+            <img class="pixel-icon" src="assets/sprites/home.png" alt="" width="64" height="64" />
           </span>
           <span class="brand-copy"><strong>Hem & Härd</strong><small>ordning på hemmaplan</small></span>
         </a>
 
         <div class="sidebar-label">Ditt hem</div>
         <nav class="main-nav" aria-label="Huvudmeny">
-          <button class="nav-link is-active" data-view="home">
-            <span class="nav-icon">⌂</span><span>Överblick</span>
+          <button class="nav-link is-active" data-view="home" aria-label="Överblick">
+            <span class="nav-icon"><img class="pixel-icon" src="assets/sprites/home.png" alt="" /></span><span>Överblick</span>
           </button>
-          <button class="nav-link" data-view="projects">
-            <span class="nav-icon">▤</span><span>Projekt</span><span class="nav-count" id="project-count">0</span>
+          <button class="nav-link" data-view="projects" aria-label="Projekt">
+            <span class="nav-icon"><img class="pixel-icon" src="assets/sprites/tools.png" alt="" /></span><span>Projekt</span><span class="nav-count" id="project-count">0</span>
           </button>
-          <button class="nav-link" data-view="library">
-            <span class="nav-icon">▧</span><span>Uppgiftsboden</span>
+          <button class="nav-link" data-view="library" aria-label="Uppgiftsboden">
+            <span class="nav-icon"><img class="pixel-icon" src="assets/sprites/clipboard.png" alt="" /></span><span>Uppgiftsboden</span>
           </button>
         </nav>
 
         <div class="sidebar-section-heading">
           <span class="sidebar-label">Senaste projekt</span>
-          <button class="icon-button small" id="sidebar-add-project" aria-label="Skapa projekt">+</button>
+          <button class="icon-button small" id="sidebar-add-project" aria-label="Skapa projekt"><img class="pixel-icon" src="assets/sprites/plus.png" alt="" /></button>
         </div>
         <div class="project-nav-list" id="project-nav-list"></div>
 
         <div class="sidebar-bottom">
           <div class="weather-card">
-            <span class="weather-icon" aria-hidden="true">☀</span>
+            <img class="weather-icon" src="assets/sprites/lantern.png" alt="" />
             <div><strong>En sak i taget.</strong><span>Det räcker långt.</span></div>
           </div>
           <div class="profile-row">
@@ -60,36 +56,24 @@
           <div class="breadcrumb"><span>Mitt hem</span><span class="crumb-separator">/</span><strong id="breadcrumb-current">Överblick</strong></div>
           <div class="topbar-actions">
             <span class="today-label" id="today-label"></span>
-            <button class="button button-dark" id="top-add-project"><span aria-hidden="true">＋</span> Nytt projekt</button>
+            <button class="button button-dark" id="top-add-project"><img class="pixel-icon" src="assets/sprites/plus.png" alt="" /> Nytt projekt</button>
           </div>
         </header>
 
         <section class="view-panel" id="home-view">
           <div class="welcome-row">
-            <div>
+            <div class="welcome-copy">
               <div class="eyebrow"><span class="eyebrow-line"></span> DITT HEM, DINA TAKTER</div>
-              <h1>Små steg gör<br /><em>stor skillnad.</em></h1>
+              <h1>Små steg gör<br /> <em>stor skillnad.</em></h1>
               <p class="welcome-subtitle">Samla allt du vill få gjort hemma. Planera i projekt, plocka från din uppgiftsbod och bocka av längs vägen.</p>
             </div>
-            <div class="welcome-illustration" aria-label="Illustration av ett litet hus med trädgård" role="img">
-              <div class="sun-disc"></div>
-              <div class="cloud cloud-one"></div><div class="cloud cloud-two"></div>
-              <div class="hill hill-back"></div><div class="hill hill-front"></div>
-              <div class="sprite-house">
-                <div class="house-roof"></div>
-                <div class="house-body"><div class="house-window"></div><div class="house-door"></div></div>
-              </div>
-              <div class="sprite-tree tree-one"><i></i><b></b></div>
-              <div class="sprite-tree tree-two"><i></i><b></b></div>
-              <div class="garden-path"></div>
-              <span class="art-caption">HEMMA ÄR DÄR PROJEKTEN BOR</span>
-            </div>
+            <img class="welcome-illustration" src="assets/sprites/landscape.png" alt="Ett varmt upplyst lanthem med trädgård i kvällssolen" width="1200" height="400" fetchpriority="high" />
           </div>
 
           <div class="stats-row" id="stats-row">
-            <div class="stat-card"><span class="stat-icon wood-icon">▤</span><div><span class="stat-label">Aktiva projekt</span><strong id="stat-projects">0</strong></div></div>
-            <div class="stat-card"><span class="stat-icon metal-icon">✓</span><div><span class="stat-label">Kvar att göra</span><strong id="stat-open">0</strong></div></div>
-            <div class="stat-card"><span class="stat-icon stone-icon">✦</span><div><span class="stat-label">Avbockade uppgifter</span><strong id="stat-done">0</strong></div></div>
+            <div class="stat-card"><span class="stat-icon wood-icon"><img class="pixel-icon" src="assets/sprites/tools.png" alt="" /></span><div><span class="stat-label">Aktiva projekt</span><strong id="stat-projects">0</strong></div></div>
+            <div class="stat-card"><span class="stat-icon metal-icon"><img class="pixel-icon" src="assets/sprites/clipboard.png" alt="" /></span><div><span class="stat-label">Kvar att göra</span><strong id="stat-open">0</strong></div></div>
+            <div class="stat-card"><span class="stat-icon stone-icon"><img class="pixel-icon" src="assets/sprites/check-done.png" alt="" /></span><div><span class="stat-label">Avbockade uppgifter</span><strong id="stat-done">0</strong></div></div>
           </div>
 
           <div class="section-heading">
@@ -100,11 +84,11 @@
 
           <div class="lower-grid">
             <section class="surface-panel next-up-panel">
-              <div class="panel-heading"><div><div class="eyebrow">NÄSTA LILLA STEG</div><h3>Att ta tag i</h3></div><span class="panel-stamp">✳</span></div>
+              <div class="panel-heading"><div><div class="eyebrow">NÄSTA LILLA STEG</div><h3>Att ta tag i</h3></div><img class="panel-stamp pixel-icon" src="assets/sprites/pencil.png" alt="" /></div>
               <div id="next-up-list"></div>
             </section>
             <section class="surface-panel tip-panel">
-              <div class="tip-art" aria-hidden="true"><span>✿</span><i></i><b></b></div>
+              <img class="tip-art" src="assets/sprites/plant.png" alt="" />
               <div class="eyebrow">HEMMAFIXAR-TIPS</div>
               <h3>En lagom plan<br />är en bra plan.</h3>
               <p>Samla små och stora saker i uppgiftsboden. Sedan plockar du ihop precis det du behöver för helgen.</p>
@@ -116,7 +100,7 @@
         <section class="view-panel hidden" id="projects-view">
           <div class="page-heading">
             <div><div class="eyebrow"><span class="eyebrow-line"></span> PLANERA & GÖR</div><h1>Projekt på <em>hemmaplan.</em></h1><p>Samla uppgifter för helgen, säsongen eller allt det där som väntat lite för länge.</p></div>
-            <button class="button button-dark" id="projects-add"><span>＋</span> Skapa projekt</button>
+            <button class="button button-dark" id="projects-add"><img class="pixel-icon" src="assets/sprites/plus.png" alt="" /> Skapa projekt</button>
           </div>
           <div class="project-grid project-grid-all" id="all-projects-grid"></div>
         </section>
@@ -124,7 +108,7 @@
         <section class="view-panel hidden" id="library-view">
           <div class="page-heading">
             <div><div class="eyebrow"><span class="eyebrow-line"></span> DIN ÅTERANVÄNDBARA LISTA</div><h1>Uppgifts<em>boden.</em></h1><p>Spara sånt som behöver göras. Lägg samma uppgift i flera projekt utan att tappa bort originalet.</p></div>
-            <button class="button button-dark" id="library-add"><span>＋</span> Ny uppgift</button>
+            <button class="button button-dark" id="library-add"><img class="pixel-icon" src="assets/sprites/plus.png" alt="" /> Ny uppgift</button>
           </div>
           <div class="library-toolbar"><span id="library-count">0 sparade uppgifter</span><span class="library-hint"><span class="metal-dot"></span> Uppgifter här ligger kvar när du bockar av dem i ett projekt.</span></div>
           <div class="library-list" id="library-list"></div>
@@ -133,7 +117,7 @@
         <section class="view-panel hidden" id="project-view">
           <div class="project-detail-heading">
             <div><button class="back-link" data-open-view="projects">← Alla projekt</button><div class="eyebrow" id="detail-eyebrow">PROJEKT</div><h1 id="detail-title"></h1><p id="detail-description"></p></div>
-            <button class="button button-outline" id="detail-add-task"><span>＋</span> Lägg till uppgift</button>
+            <button class="button button-outline" id="detail-add-task"><img class="pixel-icon" src="assets/sprites/plus.png" alt="" /> Lägg till uppgift</button>
           </div>
           <div class="detail-progress-panel">
             <div class="detail-progress-top"><div><span class="eyebrow">FRAMÅT I DIN TAKT</span><strong id="detail-progress-text">0 av 0 klart</strong></div><span class="progress-percent" id="detail-progress-percent">0%</span></div>
@@ -141,6 +125,33 @@
           </div>
           <div class="detail-task-heading"><h2>Projektets uppgifter</h2><span id="detail-task-count"></span></div>
           <div class="detail-task-list" id="detail-task-list"></div>
+        </section>
+
+        <section class="view-panel hidden" id="task-view">
+          <button class="back-link" data-open-view="library">← Till Uppgiftsboden</button>
+          <img class="task-cover" id="task-cover" src="assets/sprites/landscape.png" alt="" width="1200" height="400" />
+          <div class="page-heading task-profile-heading">
+            <div><div class="eyebrow">DIN ÅTERANVÄNDBARA UPPGIFT</div><h1 id="task-profile-title"></h1><p id="task-profile-usage"></p></div>
+            <button class="button button-dark" id="task-profile-add"><img class="pixel-icon" src="assets/sprites/plus.png" alt="" /> Lägg i projekt</button>
+          </div>
+          <form class="surface-panel task-profile-form" id="task-profile-form">
+            <div class="task-profile-grid">
+              <div>
+                <h2>Om uppgiften</h2>
+                <div class="form-field"><label for="task-title">Namn</label><input id="task-title" name="title" maxlength="80" required /></div>
+                <div class="form-field"><label for="task-category">Område</label><select id="task-category" name="category"><option>Inomhus</option><option>Trädgård</option><option>Underhåll</option><option>Övrigt</option></select></div>
+                <div class="form-field"><label for="task-description">Beskrivning och instruktioner</label><textarea id="task-description" name="description" maxlength="10000" placeholder="Vad ska göras? Beskriv stegen och vad som är bra att tänka på."></textarea></div>
+              </div>
+              <div>
+                <h2>Förberedelser</h2>
+                <div class="form-field"><label for="task-tools">Verktyg och material — ett per rad</label><textarea id="task-tools" name="tools" maxlength="4000" placeholder="Kratta&#10;Handskar&#10;Trädgårdssäck"></textarea></div>
+                <div class="form-field"><label for="task-image">Omslagsbild</label><input id="task-image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="task-image-help" /></div>
+                <p class="task-profile-help" id="task-image-help">JPG, PNG eller WebP, högst 10 MB. Bilden anpassas för webben och sparas först när du sparar uppgiften.</p>
+                <button type="button" class="small-action" id="task-image-remove">Ta bort egen bild</button>
+              </div>
+            </div>
+            <div class="task-profile-footer"><p>Ändringarna gäller uppgiften i alla projekt. Avbockning är fortfarande separat för varje projekt.</p><button class="button button-dark" id="task-profile-save" type="submit">Spara uppgift</button></div>
+          </form>
         </section>
       </main>
     </div>

@@ -1,0 +1,28 @@
+Third-party artwork used for the pixel UI trial
+
+Parchment GUI
+Author: zwonky
+Source: https://opengameart.org/content/parchment-gui
+License: CC0 1.0 Universal
+License text: https://creativecommons.org/publicdomain/zero/1.0/
+Original downloads:
+https://opengameart.org/sites/default/files/panels.png
+https://opengameart.org/sites/default/files/buttons_14.png
+Derived from GUI elements: https://opengameart.org/content/gui-elements
+Local modifications: extracted plain panel and paper center; replaced the
+bright yellow with cream while preserving pixel geometry.
+
+Pixel Art Wooden GUI
+Author: Narik / soulofkiran
+Author source: https://soulofkiran.itch.io/pixel-art-wooden-gui-v1
+Download mirror: https://opengameart.org/content/pixel-art-wooden-gui-by-narik-soulofkiran
+License: CC0 1.0 Universal; author also explicitly permits personal and
+commercial use, editing, and use without attribution.
+License text: https://creativecommons.org/publicdomain/zero/1.0/
+Original download:
+https://opengameart.org/sites/default/files/wooden_gui_32x32.png
+Local modifications: extracted blank brown buttons and wood center.
+
+Rebuild extracted assets with: python tools\prepare_sprites.py
+Requires Pillow. Original files are retained in this directory.
+UI borders repeat at 2x native pixel scale; they are not stretched across panels.
